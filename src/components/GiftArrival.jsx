@@ -32,15 +32,17 @@ export default function GiftArrival({ receiverName, senderName, onUnwrap }) {
             <div className="gift-body">
               <div className="body-ribbon-v"></div>
               <div className="body-ribbon-h"></div>
-              <div className="hologram-tag">
-                <div className="tag-row">
-                  <span className="tag-lbl">TO:</span>
-                  <span className="tag-val">{receiverName}</span>
-                </div>
-                <div className="tag-row">
-                  <span className="tag-lbl">FROM:</span>
-                  <span className="tag-val">{senderName}</span>
-                </div>
+            </div>
+
+            {/* Holographic Tag on Gift Box (Positioned on top of box, never clipped) */}
+            <div className="hologram-tag">
+              <div className="tag-row">
+                <span className="tag-lbl">TO:</span>
+                <span className="tag-val">{receiverName}</span>
+              </div>
+              <div className="tag-row">
+                <span className="tag-lbl">FROM:</span>
+                <span className="tag-val">{senderName}</span>
               </div>
             </div>
           </div>
