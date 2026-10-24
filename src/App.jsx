@@ -239,6 +239,13 @@ export default function App() {
     });
   }, [buildShareUrl, soundEnabled]);
 
+  const handleShareWhatsApp = useCallback(() => {
+    const shareUrl = buildShareUrl();
+    const to = receiverName.trim() || 'Special Person';
+    const text = encodeURIComponent(`🎉 Hey ${to}! You have received an exclusive birthday surprise package! Open your gift here: ${shareUrl}`);
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  }, [buildShareUrl, receiverName]);
+
   const handleTestPreview = useCallback(() => {
     const receiverUrl = buildShareUrl();
     window.history.pushState({}, '', receiverUrl);
@@ -279,6 +286,7 @@ export default function App() {
             copyStatus={copyStatus}
             onCopyLink={handleCopyLink}
             onTestPreview={handleTestPreview}
+            onShareWhatsApp={handleShareWhatsApp}
           />
         )}
 
@@ -291,17 +299,19 @@ export default function App() {
         )}
 
         {mode === 'receiver' && giftOpened && (
-          <section className="app-view">
-            {/* Grand Kinetic Hero */}
-            <div className="celebration-hero">
-              <div className="kinetic-text-wrap">
-                <span className="kinetic-word word-happy">HAPPY</span>
-                <span className="kinetic-word word-birthday">BIRTHDAY</span>
-              </div>
-              <h1 className="celebration-name text-gradient">{receiverName}!</h1>
-            </div>
+          <section id="view-receiver-celebration" className="app-view">
+            {/* Grand Celestial Happy Birthday Header */}
+            <header className="celebration-hero" id="main-celebration-hero">
+              <div className="celebration-badge animate-slide-up">🎉 Happy Birthday 🎉</div>
+              <h1 className="hero-title animate-slide-up delay-1">
+                Happy Birthday, <span className="text-gradient">{receiverName}</span>!
+              </h1>
+              <p className="hero-quote animate-slide-up delay-2">
+                "May this new orbit around the sun bring you endless joy, fearless triumph, and radiant magic!"
+              </p>
+            </header>
 
-            {/* 3D Birthday Cake & Candles */}
+            {/* 3D Birthday Cake & Candles Ritual */}
             <BirthdayCake
               receiverName={receiverName}
               photoUrl={photoUrl}
@@ -333,8 +343,13 @@ export default function App() {
 
             {/* Footer Navigation */}
             <footer className="celebration-footer">
-              <button type="button" className="btn-action ghost" onClick={handleRewindToGift}>
-                <span>🎁 Rewatch Gift Surprise</span>
+              <button
+                type="button"
+                id="btn-rewatch-gift"
+                className="btn-link"
+                onClick={handleRewindToGift}
+              >
+                🔄 Rewatch Gift Unboxing
               </button>
             </footer>
           </section>

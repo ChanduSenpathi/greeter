@@ -10,9 +10,9 @@ export default function WishingSky({
     <section className="wishing-sky-section glass-panel">
       <div className="sky-header">
         <span className="beacon-mini-badge">🎈 CELESTIAL BLESSINGS</span>
-        <h3 className="sky-title">Interactive Floating Wishing Sky</h3>
-        <p className="sky-sub">
-          Floating star orbs drift above your celebration. Tap any orb to reveal a cosmic blessing!
+        <h3>Tap The Floating Star Orbs</h3>
+        <p>
+          Glowing lanterns of destiny are floating by. Tap any orb to reveal a special blessing for your year ahead!
         </p>
       </div>
 
@@ -35,14 +35,20 @@ export default function WishingSky({
       </div>
 
       {activeBlessing && (
-        <div className="blessing-toast">
-          <span>✨ {activeBlessing}</span>
+        <div id="blessing-reveal-toast" className="blessing-toast">
+          <span className="blessing-icon">✨</span>
+          <span>{activeBlessing}</span>
         </div>
       )}
 
-      <div className="sky-action-bar">
-        <button type="button" className="btn-action primary small" onClick={onSpawnOrb}>
-          <span>✨ Release More Star Wishing Orbs</span>
+      <div className="sky-controls">
+        <button
+          type="button"
+          id="btn-release-orbs"
+          className="btn-action secondary"
+          onClick={onSpawnOrb}
+        >
+          <span>✨ Release More Star Orbs</span>
         </button>
       </div>
     </section>
