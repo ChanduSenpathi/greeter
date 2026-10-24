@@ -160,24 +160,57 @@ export default function App() {
 
   // --- ORBS & BLESSINGS ---
   const spawnStarOrb = useCallback(() => {
-    const emojis = ['⭐', '🌟', '✨', '🎈', '💖', '🎂'];
-    const newOrb = {
-      id: Date.now() + Math.random(),
-      left: Math.random() * 85 + 5,
-      bottom: Math.random() * 40 + 20,
-      emoji: emojis[Math.floor(Math.random() * emojis.length)],
-      delay: Math.random() * 2
-    };
-    setFloatingOrbs((prev) => [...prev.slice(-12), newOrb]);
+    playTone(720, 0.1, 'sine', 0.1, soundEnabled);
+    const emojis = ['⭐', '🌟', '✨', '🎈', '💖', '🎂', '👑', '🌈', '🚀'];
+    const newOrbs = [];
+    for (let i = 0; i < 4; i++) {
+      newOrbs.push({
+        id: Date.now() + Math.random() + i,
+        left: Math.random() * 75 + 10,
+        drift: (Math.random() - 0.5) * 80,
+        duration: Math.random() * 4 + 7,
+        delay: i * 0.22,
+        emoji: emojis[Math.floor(Math.random() * emojis.length)]
+      });
+    }
+    setFloatingOrbs((prev) => [...prev.slice(-14), ...newOrbs]);
+  }, [soundEnabled]);
+
+  const handleOrbFinish = useCallback((id) => {
+    setFloatingOrbs((prev) => prev.filter((orb) => orb.id !== id));
   }, []);
 
-  const handlePopOrb = useCallback((id) => {
+  const handlePopOrb = useCallback((id, clientX, clientY) => {
     playPopSound(soundEnabled);
+    if (effectsRef.current && clientX && clientY) {
+      effectsRef.current.launchConfetti(clientX, clientY, 25);
+    }
     const blessing = STAR_BLESSINGS[Math.floor(Math.random() * STAR_BLESSINGS.length)];
     setActiveBlessing(blessing);
     setFloatingOrbs((prev) => prev.filter((orb) => orb.id !== id));
     setTimeout(() => setActiveBlessing(null), 4500);
   }, [soundEnabled]);
+
+  // Ambient Star Orbs during celebration
+  useEffect(() => {
+    if (!giftOpened || mode !== 'receiver') return;
+    spawnStarOrb();
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        const emojis = ['⭐', '🌟', '✨', '🎈', '💖', '🎂', '👑', '🌈'];
+        const orb = {
+          id: Date.now() + Math.random(),
+          left: Math.random() * 75 + 10,
+          drift: (Math.random() - 0.5) * 70,
+          duration: Math.random() * 4 + 8,
+          delay: 0,
+          emoji: emojis[Math.floor(Math.random() * emojis.length)]
+        };
+        setFloatingOrbs((prev) => [...prev.slice(-12), orb]);
+      }
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [giftOpened, mode, spawnStarOrb]);
 
   // --- ENVELOPE HANDLERS ---
   const handleOpenEnvelope = useCallback(() => {
@@ -433,6 +466,7 @@ export default function App() {
               activeBlessing={activeBlessing}
               onPopOrb={handlePopOrb}
               onSpawnOrb={spawnStarOrb}
+              onOrbFinish={handleOrbFinish}
             />
 
             {/* Footer Navigation */}
