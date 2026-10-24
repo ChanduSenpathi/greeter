@@ -34,7 +34,7 @@ export default function App() {
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
   const [activeBlessing, setActiveBlessing] = useState(null);
   const [copyStatus, setCopyStatus] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Floating Star Orbs
   const [floatingOrbs, setFloatingOrbs] = useState([]);
@@ -43,6 +43,37 @@ export default function App() {
   const effectsRef = useRef(null);
   const autoBlowTimeoutRef = useRef(null);
   const fireworksIntervalRef = useRef(null);
+
+  // --- DEFAULT UNMUTED MUSIC & AUTOPLAY HANDLING ---
+  useEffect(() => {
+    if (soundEnabled) {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'running') {
+        playBirthdayMelody(true);
+      } else {
+        // Unlock on user's first touch/click/key if browser restricted autoplay
+        const unlockAudio = () => {
+          const activeCtx = getAudioContext();
+          if (activeCtx && activeCtx.state === 'running') {
+            playBirthdayMelody(true);
+          }
+          window.removeEventListener('click', unlockAudio);
+          window.removeEventListener('touchstart', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+        };
+        window.addEventListener('click', unlockAudio, { once: true });
+        window.addEventListener('touchstart', unlockAudio, { once: true });
+        window.addEventListener('keydown', unlockAudio, { once: true });
+        return () => {
+          window.removeEventListener('click', unlockAudio);
+          window.removeEventListener('touchstart', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+        };
+      }
+    } else {
+      stopBirthdayMelody();
+    }
+  }, [soundEnabled]);
 
   // --- CANDLE & CAKE CEREMONY ---
   const handleToggleCandles = useCallback(() => {
@@ -71,6 +102,10 @@ export default function App() {
 
   // --- UNWRAP SURPRISE GIFT ---
   const handleUnwrapGift = useCallback(() => {
+    getAudioContext();
+    if (soundEnabled) {
+      playBirthdayMelody(true);
+    }
     playPopSound(soundEnabled);
     playTone(523.25, 0.15, 'triangle', 0.2, soundEnabled);
     setGiftOpened(true);
