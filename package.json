@@ -1,12 +1,19 @@
 {
   "name": "greeter-birthday-wish",
+  "private": true,
   "version": "1.0.0",
-  "description": "Interactive Cyber Birthday Wish Web Experience",
+  "type": "module",
   "scripts": {
-    "build": "echo 'Static build ready'",
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "keywords": ["birthday", "greeter", "celebration"],
-  "author": "Chandu Senapathi",
-  "license": "MIT"
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7"
+  }
 }
