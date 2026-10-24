@@ -175,7 +175,9 @@ export default function App() {
 
     const toVal = getParam('to') || getParam('name') || getParam('receiver');
     const fromVal = getParam('from') || getParam('sender');
+    const presetVal = getParam('preset');
     const msgVal = getParam('msg') || getParam('message');
+    const cmsgVal = getParam('cmsg');
     const photoVal = getParam('photo');
     const avatarVal = getParam('avatar');
     let savedPhoto = '';
@@ -183,11 +185,25 @@ export default function App() {
       savedPhoto = localStorage.getItem('cyberwish_photo') || '';
     } catch (e) {}
 
+    // Resolve wish message cleanly
+    let resolvedMsg = MESSAGE_PRESETS.heartfelt;
+    if (presetVal && MESSAGE_PRESETS[presetVal]) {
+      resolvedMsg = MESSAGE_PRESETS[presetVal];
+    } else if (cmsgVal) {
+      try {
+        resolvedMsg = decodeURIComponent(atob(cmsgVal));
+      } catch (e) {
+        resolvedMsg = MESSAGE_PRESETS.heartfelt;
+      }
+    } else if (msgVal) {
+      resolvedMsg = msgVal.trim();
+    }
+
     if (toVal) {
       setMode('receiver');
       setReceiverName(toVal.trim());
       if (fromVal) setSenderName(fromVal.trim());
-      if (msgVal) setWishMessage(msgVal.trim());
+      setWishMessage(resolvedMsg);
       if (photoVal) {
         setPhotoUrl(photoVal);
       } else if (savedPhoto) {
@@ -201,7 +217,7 @@ export default function App() {
           JSON.stringify({
             to: toVal.trim(),
             from: fromVal ? fromVal.trim() : 'Chandu Senapathi',
-            msg: msgVal ? msgVal.trim() : MESSAGE_PRESETS.heartfelt,
+            msg: resolvedMsg,
             photo: photoVal || savedPhoto || '',
             avatar: avatarVal || '👑'
           })
@@ -236,10 +252,34 @@ export default function App() {
   const buildShareUrl = useCallback(() => {
     const base = window.location.origin + window.location.pathname;
     const url = new URL(base);
-    url.searchParams.set('to', receiverName.trim() || 'Priya');
-    url.searchParams.set('from', senderName.trim() || 'Chandu Senapathi');
-    url.searchParams.set('msg', wishMessage.trim() || MESSAGE_PRESETS.heartfelt);
-    if (selectedAvatar) url.searchParams.set('avatar', selectedAvatar);
+    const to = receiverName.trim() || 'Priya';
+    const from = senderName.trim() || 'Chandu Senapathi';
+    url.searchParams.set('to', to);
+    if (from !== 'Chandu Senapathi') {
+      url.searchParams.set('from', from);
+    }
+
+    // Clean sharing: Do NOT expose raw message text in the URL!
+    const trimmedMsg = wishMessage.trim();
+    if (trimmedMsg === MESSAGE_PRESETS.joyful.trim()) {
+      url.searchParams.set('preset', 'joyful');
+    } else if (trimmedMsg === MESSAGE_PRESETS.inspirational.trim()) {
+      url.searchParams.set('preset', 'inspirational');
+    } else if (trimmedMsg === MESSAGE_PRESETS.heartfelt.trim()) {
+      // Default heartfelt message: Receiver automatically uses this! Zero URL pollution.
+    } else {
+      // Custom message: encode cleanly to keep URL clean and maintain the unboxing surprise
+      try {
+        const encoded = btoa(encodeURIComponent(trimmedMsg));
+        url.searchParams.set('cmsg', encoded);
+      } catch (e) {
+        url.searchParams.set('msg', trimmedMsg);
+      }
+    }
+
+    if (selectedAvatar && selectedAvatar !== '👑') {
+      url.searchParams.set('avatar', selectedAvatar);
+    }
     if (photoUrl && (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'))) {
       url.searchParams.set('photo', photoUrl);
     }
