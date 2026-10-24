@@ -178,13 +178,21 @@ export default function App() {
     const msgVal = getParam('msg') || getParam('message');
     const photoVal = getParam('photo');
     const avatarVal = getParam('avatar');
+    let savedPhoto = '';
+    try {
+      savedPhoto = localStorage.getItem('cyberwish_photo') || '';
+    } catch (e) {}
 
     if (toVal) {
       setMode('receiver');
       setReceiverName(toVal.trim());
       if (fromVal) setSenderName(fromVal.trim());
       if (msgVal) setWishMessage(msgVal.trim());
-      if (photoVal) setPhotoUrl(photoVal);
+      if (photoVal) {
+        setPhotoUrl(photoVal);
+      } else if (savedPhoto) {
+        setPhotoUrl(savedPhoto);
+      }
       if (avatarVal) setSelectedAvatar(avatarVal);
 
       try {
@@ -194,7 +202,7 @@ export default function App() {
             to: toVal.trim(),
             from: fromVal ? fromVal.trim() : 'Chandu Senapathi',
             msg: msgVal ? msgVal.trim() : MESSAGE_PRESETS.heartfelt,
-            photo: photoVal || '',
+            photo: photoVal || savedPhoto || '',
             avatar: avatarVal || '👑'
           })
         );
@@ -209,13 +217,18 @@ export default function App() {
             setReceiverName(parsed.to);
             if (parsed.from) setSenderName(parsed.from);
             if (parsed.msg) setWishMessage(parsed.msg);
-            if (parsed.photo) setPhotoUrl(parsed.photo);
+            if (parsed.photo) {
+              setPhotoUrl(parsed.photo);
+            } else if (savedPhoto) {
+              setPhotoUrl(savedPhoto);
+            }
             if (parsed.avatar) setSelectedAvatar(parsed.avatar);
             return;
           }
         }
       } catch (e) {}
       setMode('studio');
+      if (savedPhoto) setPhotoUrl(savedPhoto);
     }
   }, []);
 
@@ -227,8 +240,11 @@ export default function App() {
     url.searchParams.set('from', senderName.trim() || 'Chandu Senapathi');
     url.searchParams.set('msg', wishMessage.trim() || MESSAGE_PRESETS.heartfelt);
     if (selectedAvatar) url.searchParams.set('avatar', selectedAvatar);
+    if (photoUrl && (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'))) {
+      url.searchParams.set('photo', photoUrl);
+    }
     return url.toString();
-  }, [receiverName, senderName, wishMessage, selectedAvatar]);
+  }, [receiverName, senderName, wishMessage, selectedAvatar, photoUrl]);
 
   const handleCopyLink = useCallback(() => {
     const shareUrl = buildShareUrl();
@@ -260,6 +276,9 @@ export default function App() {
           avatar: selectedAvatar
         })
       );
+      if (photoUrl) {
+        localStorage.setItem('cyberwish_photo', photoUrl);
+      }
     } catch (e) {}
     setMode('receiver');
     setGiftOpened(false);

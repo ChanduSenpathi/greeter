@@ -22,7 +22,35 @@ export default function SenderStudio({
     if (file) {
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
-        setPhotoUrl(uploadEvent.target.result);
+        const rawData = uploadEvent.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 320;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxDim) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            }
+          } else {
+            if (h > maxDim) {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedData = canvas.toDataURL('image/jpeg', 0.88);
+          setPhotoUrl(compressedData);
+          try {
+            localStorage.setItem('cyberwish_photo', compressedData);
+          } catch (err) {}
+        };
+        img.src = rawData;
       };
       reader.readAsDataURL(file);
     }
@@ -85,27 +113,27 @@ export default function SenderStudio({
             </div>
 
             <div className="photo-upload-card" id="photo-upload-card">
-              {/* Dropzone / File Picker */}
-              <div className="photo-dropzone" id="photo-dropzone">
-                <input
-                  type="file"
-                  id="input-photo-file"
-                  accept="image/*"
-                  className="photo-file-input"
-                  aria-label="Upload birthday person photo"
-                  onChange={handlePhotoUpload}
-                />
-                <div className="dropzone-content">
-                  <div className="dropzone-icon-circle">📸</div>
-                  <div className="dropzone-text-group">
-                    <strong className="dropzone-title">Click or Drop Photo Here</strong>
-                    <span className="dropzone-hint">Upload portrait to crown their illuminated birthday cake</span>
+              {/* Show Dropzone ONLY when NO photo is uploaded */}
+              {!photoUrl ? (
+                <div className="photo-dropzone" id="photo-dropzone">
+                  <input
+                    type="file"
+                    id="input-photo-file"
+                    accept="image/*"
+                    className="photo-file-input"
+                    aria-label="Upload birthday person photo"
+                    onChange={handlePhotoUpload}
+                  />
+                  <div className="dropzone-content">
+                    <div className="dropzone-icon-circle">📸</div>
+                    <div className="dropzone-text-group">
+                      <strong className="dropzone-title">Click or Drop Photo Here</strong>
+                      <span className="dropzone-hint">Upload portrait to crown their illuminated birthday cake</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Live Photo Preview Inside Studio */}
-              {photoUrl && (
+              ) : (
+                /* Once photo is uploaded, ONLY show this preview card and hide the upload dropzone */
                 <div id="studio-photo-preview" className="studio-photo-preview">
                   <div className="studio-avatar-wrapper">
                     <img id="studio-photo-img" src={photoUrl} alt="Photo preview for birthday cake" />
@@ -113,12 +141,17 @@ export default function SenderStudio({
                   </div>
                   <div className="studio-photo-details">
                     <div className="photo-status-tag">✨ Photo Ready to Crown the Cake!</div>
-                    <p className="photo-status-sub">This photo will emerge on the cake after candles are blown.</p>
+                    <p className="photo-status-sub">This portrait will emerge crowned on the cake when candles are blown.</p>
                     <button
                       type="button"
                       id="btn-remove-photo"
                       className="btn-remove-photo"
-                      onClick={() => setPhotoUrl('')}
+                      onClick={() => {
+                        setPhotoUrl('');
+                        try {
+                          localStorage.removeItem('cyberwish_photo');
+                        } catch (err) {}
+                      }}
                     >
                       ✕ Remove & Choose Another
                     </button>
