@@ -1,0 +1,12 @@
+{
+  "name": "greeter-birthday-wish",
+  "version": "1.0.0",
+  "description": "Interactive Cyber Birthday Wish Web Experience",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["birthday", "greeter", "celebration"],
+  "author": "Chandu Senapathi",
+  "license": "MIT"
+}

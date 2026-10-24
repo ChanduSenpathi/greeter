@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>✨ A Cyber Birthday Wish For You! ✨</title>
+  <meta name="description"
+    content="An interactive, cinematic cyber neon birthday celebration experience created with love.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body data-theme="cyber">
+  <!-- Interactive Particle Background Canvases -->
+  <canvas id="ambient-canvas" class="ambient-canvas"></canvas>
+  <canvas id="celebration-canvas" class="celebration-canvas"></canvas>
+
+  <!-- Floating Sky Wishing Orbs Container -->
+  <div id="wishing-sky-container" class="wishing-sky-container" aria-hidden="true"></div>
+
+  <!-- Top Bar Navigation -->
+  <header class="top-bar">
+    <div class="control-actions">
+      <button id="btn-sound-toggle" class="icon-button" title="Toggle Music & Sound Effects" aria-label="Toggle Sound">
+        <span id="sound-icon" class="btn-icon">🔇</span>
+        <span class="btn-label">Music</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="main-wrapper">
+
+    <!-- ======================================================================
+         VIEW 1: SENDER / CREATOR STUDIO
+         (Active when no recipient in URL, or when sender wants to craft a wish)
+         ====================================================================== -->
+    <section id="view-sender-studio" class="app-view hidden">
+      <div class="studio-card glass-panel">
+        <div class="badge-pill cyber-badge">⚡ CYBER WISH CREATOR ⚡</div>
+        <h1 class="studio-title">Send a Magical <span class="text-gradient">Birthday Wish</span></h1>
+        <p class="studio-sub">Enter the birthday person's name below to generate their exclusive interactive gift link.
+        </p>
+
+        <form id="form-create-wish" class="studio-form" onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="input-to-name">Birthday Person's Name (Receiver)</label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon">👑</span>
+                <input type="text" id="input-to-name" placeholder="e.g. Priya, Alex, Sarah, Mom" maxlength="30"
+                  autocomplete="off" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-from-name">Your Name (Sender)</label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon">💌</span>
+                <input type="text" id="input-from-name" placeholder="e.g. Chandu Senapathi, Your Bestie, Sam" maxlength="30"
+                  autocomplete="off" value="Chandu Senapathi">
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo Upload for Birthday Cake Reveal -->
+          <div class="form-group photo-upload-group">
+            <div class="label-with-presets">
+              <label for="input-photo-file">
+                <span>Birthday Person's Photo (Reveals on their Cake! 🎂)</span>
+              </label>
+              <span class="upload-badge-pill">Magical Cake Topper</span>
+            </div>
+
+            <div class="photo-upload-card" id="photo-upload-card">
+              <!-- Dropzone / File Picker -->
+              <div class="photo-dropzone" id="photo-dropzone">
+                <input type="file" id="input-photo-file" accept="image/*" class="photo-file-input"
+                  aria-label="Upload birthday person photo">
+                <div class="dropzone-content">
+                  <div class="dropzone-icon-circle">📸</div>
+                  <div class="dropzone-text-group">
+                    <strong class="dropzone-title">Click or Drop Photo Here</strong>
+                    <span class="dropzone-hint">Upload portrait to crown their illuminated birthday cake</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Photo Preview Inside Studio -->
+              <div id="studio-photo-preview" class="studio-photo-preview hidden">
+                <div class="studio-avatar-wrapper">
+                  <img id="studio-photo-img" src="" alt="Photo preview for birthday cake">
+                  <div class="studio-avatar-ring"></div>
+                </div>
+                <div class="studio-photo-details">
+                  <div class="photo-status-tag">✨ Photo Ready to Crown the Cake!</div>
+                  <p class="photo-status-sub">This photo will emerge on the cake after candles are blown.</p>
+                  <button type="button" id="btn-remove-photo" class="btn-remove-photo">✕ Remove & Choose Another</button>
+                </div>
+              </div>
+
+              <!-- Quick Avatar Presets -->
+              <div class="quick-avatar-bar">
+                <span class="quick-avatar-label">Or Pick a Cyber Avatar:</span>
+                <div class="quick-avatar-chips">
+                  <button type="button" class="avatar-chip" data-avatar="👑">👑 Crown</button>
+                  <button type="button" class="avatar-chip" data-avatar="⭐">⭐ Superstar</button>
+                  <button type="button" class="avatar-chip" data-avatar="💖">💖 Bestie</button>
+                  <button type="button" class="avatar-chip" data-avatar="🚀">🚀 Cosmic</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-presets">
+              <label for="input-wish-msg">Heartfelt Birthday Message</label>
+              <div class="preset-chips">
+                <button type="button" class="preset-chip" data-preset="heartfelt">💖 Heartfelt</button>
+                <button type="button" class="preset-chip" data-preset="joyful">🎉 Cheerful</button>
+                <button type="button" class="preset-chip" data-preset="inspirational">🚀 Cosmic</button>
+              </div>
+            </div>
+            <textarea id="input-wish-msg" rows="6" placeholder="Write something sweet, inspiring, or memorable...">Through every wild adventure, storm we’ve braved together, you have always been my truest anchor.
+Having you as my best friend isn’t just a blessing—it is proof that the universe gives us chosen family.
+Thank you for understanding me even in silence, for standing by me through thick and thin, and for lighting up every room with your genuine soul.
+On your special day, my deepest wish is that life rewards you with all the peace, pure magic, and boundless love you so selflessly give to the world.
+Happy Birthday to my best friend forever—here’s to an unbreakable bond that will shine across lifetimes!</textarea>
+          </div>
+
+          <!-- Live Gift Box Mini Preview -->
+          <div class="live-preview-box">
+            <span class="preview-badge">LIVE GIFT TAG PREVIEW</span>
+            <div class="preview-tag-display">
+              <div class="preview-tag-line"><span>TO:</span> <strong id="preview-to">Priya</strong></div>
+              <div class="preview-tag-line"><span>FROM:</span> <strong id="preview-from">Chandu Senapathi</strong></div>
+            </div>
+          </div>
+
+          <!-- Studio Actions -->
+          <div class="studio-actions">
+            <button type="button" id="btn-copy-link" class="btn-primary cyber-glow-btn">
+              <span>📋 Copy Shareable Wish Link</span>
+            </button>
+            <button type="button" id="btn-whatsapp-share" class="btn-action secondary">
+              <span>📲 Share on WhatsApp</span>
+            </button>
+            <button type="button" id="btn-test-preview" class="btn-action tertiary">
+              <span>👁️ Test & Preview as Receiver</span>
+            </button>
+          </div>
+
+          <!-- Link Copy Notification Toast -->
+          <div id="copy-status-banner" class="copy-status hidden">
+            ✅ <strong>Personalized link copied to clipboard!</strong> Send it to your birthday friend to surprise them!
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         VIEW 2: RECEIVER GIFT ARRIVAL SCREEN
+         (Active when receiver opens the link with ?to=Name or tests preview)
+         ====================================================================== -->
+    <section id="view-receiver-arrival" class="app-view active">
+      <div class="arrival-showcase">
+        <div class="badge-pill cyber-badge pulse-glow">🎁 SPECIAL DELIVERY INCOMING</div>
+        <h1 class="arrival-title">A Cosmic Surprise For <span id="arrival-name-display" class="text-gradient">You</span>
+        </h1>
+        <p class="arrival-sub">A special package sent with pure love and celebration has just landed.</p>
+
+        <!-- 3D Interactive Cyber Holographic Gift Box -->
+        <div id="interactive-gift-box" class="gift-box-wrapper" role="button" tabindex="0"
+          aria-label="Tap to open your birthday surprise">
+          <div class="gift-box">
+            <div class="gift-lid">
+              <div class="ribbon-bow">
+                <span class="bow-loop left"></span>
+                <span class="bow-loop right"></span>
+                <span class="bow-center"></span>
+              </div>
+              <div class="lid-ribbon"></div>
+            </div>
+            <div class="gift-body">
+              <div class="body-ribbon-v"></div>
+              <div class="body-ribbon-h"></div>
+              <div class="hologram-tag">
+                <div class="tag-row"><span class="tag-lbl">TO:</span> <span id="tag-receiver-name"
+                    class="tag-val">You</span></div>
+                <div class="tag-row"><span class="tag-lbl">FROM:</span> <span id="tag-sender-name" class="tag-val">Chandu Senapathi</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="gift-shadow"></div>
+          <div class="gift-sparkles">
+            <span class="sparkle s1">⭐</span>
+            <span class="sparkle s2">✨</span>
+            <span class="sparkle s3">🌟</span>
+            <span class="sparkle s4">💖</span>
+          </div>
+        </div>
+
+        <button id="btn-unwrap-gift" class="btn-primary cyber-glow-btn pulse-btn">
+          <span>🎁 Tap Gift to Unwrap Your Surprise</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         VIEW 3: RECEIVER CELEBRATION EXPERIENCE (BRAND NEW CINEMATIC DESIGN)
+         (Triggered immediately when the gift is tapped/unwrapped)
+         ====================================================================== -->
+    <section id="view-receiver-celebration" class="app-view hidden">
+
+      <!-- Grand Celestial Happy Birthday Header (Animates Bottom to Top) -->
+      <header class="celebration-hero" id="main-celebration-hero">
+        <div class="celebration-badge animate-slide-up">🎉 Happy Birthday 🎉</div>
+        <h1 class="hero-title animate-slide-up delay-1">
+          Happy Birthday, <span id="celebration-name-display" class="text-gradient">Friend</span>!
+        </h1>
+        <p id="celebration-headline-quote" class="hero-quote animate-slide-up delay-2">
+          "May this new orbit around the sun bring you endless joy, fearless triumph, and radiant magic!"
+        </p>
+      </header>
+
+      <!-- Centerpiece: The Cyber Neon Birthday Cake & Candle Ritual -->
+      <section class="wishing-beacon-arena">
+        <div class="beacon-card glass-panel">
+          <!-- Cake Stage with Floating Balloons -->
+          <div class="cake-stage-wrapper">
+            <!-- Left Balloon Cluster -->
+            <div class="balloons-cluster cluster-left" id="balloons-left">
+              <div class="balloon balloon-cyan"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+              <div class="balloon balloon-pink"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+              <div class="balloon balloon-gold"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+            </div>
+
+            <!-- The Cyber Neon Birthday Cake Container -->
+            <div id="interactive-cake-container" class="cyber-cake-container" role="button" tabindex="0"
+              aria-label="Tap to blow out the candles and reveal the photo">
+              
+              <!-- MAGICAL PHOTO TOPPER (Emerges on/above cake when candles blow) -->
+              <div id="cake-photo-topper" class="cake-photo-topper">
+                <div class="topper-crown">👑</div>
+                <div class="topper-frame">
+                  <div class="topper-glow-ring"></div>
+                  <div class="topper-frame-inner">
+                    <img id="cake-person-photo" class="cake-person-photo" src="" alt="Birthday Star">
+                    <div id="cake-fallback-avatar" class="cake-fallback-avatar">
+                      <span class="avatar-emoji" id="cake-avatar-emoji">👑</span>
+                      <span class="avatar-label" id="cake-avatar-name">Friend</span>
+                    </div>
+                  </div>
+                  <div class="topper-orbit-stars">✦ ✦ ✦</div>
+                </div>
+              </div>
+
+              <!-- Cyber Candles Row atop Cake -->
+              <div class="cake-candles-row" id="cake-candles-row">
+                <!-- Left Candle -->
+                <div class="cyber-candle candle-side candle-left">
+                  <div class="candle-wick"></div>
+                  <div class="flame-wrapper">
+                    <div class="celestial-flame candle-flame lit"></div>
+                    <div class="flame-smoke"></div>
+                  </div>
+                  <div class="candle-pillar"></div>
+                </div>
+
+                <!-- Center Main Candle -->
+                <div class="cyber-candle candle-main">
+                  <div class="candle-wick"></div>
+                  <div class="flame-wrapper">
+                    <div id="celestial-flame" class="celestial-flame candle-flame lit"></div>
+                    <div id="flame-smoke" class="flame-smoke"></div>
+                  </div>
+                  <div class="candle-pillar"></div>
+                </div>
+
+                <!-- Right Candle -->
+                <div class="cyber-candle candle-side candle-right">
+                  <div class="candle-wick"></div>
+                  <div class="flame-wrapper">
+                    <div class="celestial-flame candle-flame lit"></div>
+                    <div class="flame-smoke"></div>
+                  </div>
+                  <div class="candle-pillar"></div>
+                </div>
+              </div>
+
+              <!-- 3-Tier Cyber Cake Body -->
+              <div class="cyber-cake-body">
+                <!-- Top Tier -->
+                <div class="cake-tier tier-top">
+                  <div class="tier-frosting-drips">
+                    <span class="drip d1"></span>
+                    <span class="drip d2"></span>
+                    <span class="drip d3"></span>
+                    <span class="drip d4"></span>
+                    <span class="drip d5"></span>
+                  </div>
+                  <div class="tier-glow-strip"></div>
+                  <div class="tier-sprinkles">✦ · ✦ · ✦</div>
+                </div>
+
+                <!-- Middle Tier -->
+                <div class="cake-tier tier-mid">
+                  <div class="tier-frosting-drips">
+                    <span class="drip d1"></span>
+                    <span class="drip d2"></span>
+                    <span class="drip d3"></span>
+                    <span class="drip d4"></span>
+                    <span class="drip d5"></span>
+                    <span class="drip d6"></span>
+                  </div>
+                  <div class="tier-accent-banner">
+                    <span class="cake-banner-text">★ HAPPY BIRTHDAY ★</span>
+                  </div>
+                  <div class="tier-sprinkles">✦ · ✦ · ✦ · ✦</div>
+                </div>
+
+                <!-- Base Tier -->
+                <div class="cake-tier tier-base">
+                  <div class="tier-frosting-drips">
+                    <span class="drip d1"></span>
+                    <span class="drip d2"></span>
+                    <span class="drip d3"></span>
+                    <span class="drip d4"></span>
+                    <span class="drip d5"></span>
+                    <span class="drip d6"></span>
+                    <span class="drip d7"></span>
+                  </div>
+                  <div class="tier-cyber-grid"></div>
+                </div>
+
+                <!-- Cake Plate / Stand -->
+                <div class="cake-stand-pedestal">
+                  <div class="pedestal-disc"></div>
+                  <div class="pedestal-glow"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Balloon Cluster -->
+            <div class="balloons-cluster cluster-right" id="balloons-right">
+              <div class="balloon balloon-pink"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+              <div class="balloon balloon-cyan"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+              <div class="balloon balloon-gold"><div class="balloon-shine"></div><div class="balloon-string"></div></div>
+            </div>
+          </div>
+
+          <!-- Wish Controls -->
+          <div class="beacon-actions">
+            <button id="btn-blow-flame" class="btn-action">
+              <span class="icon">💨</span>
+              <span id="btn-blow-label">Blow the Wish Candles</span>
+            </button>
+            <button id="btn-fireworks-launch" class="btn-action secondary">
+              <span class="icon">🎆</span>
+              <span>Launch Cosmic Fireworks</span>
+            </button>
+          </div>
+
+          <!-- Wish Sent Cosmic Banner -->
+          <div id="wish-sent-banner" class="wish-sent-banner hidden">
+            <div class="wish-sent-content">
+              <span class="star-icon">🌟</span>
+              <div>
+                <strong>✨ Candles Blown & Secret Wish Sent to the Cosmos! ✨</strong>
+                <p id="wish-sent-desc">May this year be filled with pure magic and all your wildest dreams come true!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Keepsake Love Letter with Envelope Cover -->
+      <section class="letter-scroll-section">
+        <div id="interactive-letter-envelope" class="envelope-container" role="button" tabindex="0"
+          aria-label="Tap on the cover to open your letter">
+          
+          <!-- Outer Envelope Cover (Front View when Closed) -->
+          <div class="envelope-cover" id="envelope-cover">
+            <!-- Envelope Top Flap with Wax Seal -->
+            <div class="envelope-top-flap" id="envelope-top-flap">
+              <div class="flap-v-shape"></div>
+              <div class="wax-seal-wrapper">
+                <div class="wax-seal-ring"></div>
+                <div class="wax-seal-core">
+                  <span class="seal-emoji">💌</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Envelope Pocket / Front Face -->
+            <div class="envelope-front-face">
+              <div class="envelope-address-card">
+                <span class="envelope-tag-badge">💖 CONFIDENTIAL KEEPSAKE LETTER</span>
+                <div class="envelope-recipient-line">
+                  <span class="env-lbl">SPECIAL DELIVERY FOR:</span>
+                  <span class="env-val letter-receiver-name">Friend</span>
+                </div>
+                <div class="envelope-sender-line">
+                  <span class="env-lbl">SENT WITH LOVE BY:</span>
+                  <span class="env-val" id="env-sender-name">Chandu Senapathi</span>
+                </div>
+              </div>
+
+              <!-- Interactive Gesture Prompt on the Cover -->
+              <div class="envelope-gesture-prompt">
+                <div class="gesture-icon-bounce">👆</div>
+                <div class="gesture-text-wrap">
+                  <strong class="gesture-title">Tap on the cover to open your letter</strong>
+                  <span class="gesture-sub">A personal message from the heart is sealed inside ✨</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- The Unfolded Letter Inside the Cover (Reveals on Tap) -->
+          <div class="letter-inner-card glass-panel" id="letter-inner-card">
+            <div class="scroll-header">
+              <div class="letter-top-row">
+                <span class="scroll-badge">💌 PERSONAL KEEPSAKE LETTER</span>
+                <button type="button" id="btn-fold-letter" class="btn-fold-letter" title="Fold back into envelope">
+                  <span>Fold Back ✕</span>
+                </button>
+              </div>
+              <h3 class="scroll-title">A Message From The Heart</h3>
+            </div>
+
+            <div class="scroll-body">
+              <div class="scroll-salutation">Dear <span class="letter-receiver-name">Friend</span>,</div>
+              <p id="scroll-message-text" class="scroll-text">Through every wild adventure, late-night conversation, and
+                storm we’ve braved together, you have always been my truest anchor.
+                Having you as my best friend isn’t just a blessing—it is proof that the universe gives us chosen family.
+                Thank you for understanding me even in silence, for standing by me through thick and thin, and for
+                lighting up every room with your genuine soul.
+                On your special day, my deepest wish is that life rewards you with all the peace, pure magic, and
+                boundless love you so selflessly give to the world.
+                Happy Birthday to my best friend forever—here’s to an unbreakable bond that will shine across lifetimes!
+              </p>
+              <div class="scroll-signature">
+                <span>With all my love & warmest wishes,</span>
+                <strong id="scroll-sender-name">— Chandu Senapathi</strong>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Floating Wishing Sky (Pop Orbs for Blessings) -->
+      <section class="wishing-sky-section glass-panel">
+        <div class="sky-header">
+          <span class="beacon-mini-badge">🎈 CELESTIAL BLESSINGS</span>
+          <h3>Tap The Floating Star Orbs</h3>
+          <p>Glowing lanterns of destiny are floating by. Tap any orb to reveal a special blessing for your year ahead!
+          </p>
+        </div>
+
+        <div id="blessing-reveal-toast" class="blessing-toast">
+          <span class="blessing-icon">✨</span>
+          <span id="blessing-text">Tap any floating orb in the sky!</span>
+        </div>
+
+        <div class="sky-controls">
+          <button id="btn-release-orbs" class="btn-action secondary">
+            <span>✨ Release More Star Orbs</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Footer Actions -->
+      <footer class="celebration-footer">
+        <button id="btn-rewatch-gift" class="btn-link">🔁 Rewatch Gift Unboxing</button>
+      </footer>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
