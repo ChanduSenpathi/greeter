@@ -14,7 +14,9 @@ import {
   playBlowSound,
   playChimeVictory,
   playBirthdayMelody,
-  stopBirthdayMelody
+  stopBirthdayMelody,
+  suspendAudio,
+  resumeAudio
 } from './utils/audioSynthesizer';
 
 export default function App() {
@@ -47,32 +49,69 @@ export default function App() {
   // --- DEFAULT UNMUTED MUSIC & AUTOPLAY HANDLING ---
   useEffect(() => {
     if (soundEnabled) {
-      const ctx = getAudioContext();
-      if (ctx && ctx.state === 'running') {
-        playBirthdayMelody(true);
-      } else {
-        // Unlock on user's first touch/click/key if browser restricted autoplay
-        const unlockAudio = () => {
-          const activeCtx = getAudioContext();
-          if (activeCtx && activeCtx.state === 'running') {
-            playBirthdayMelody(true);
-          }
-          window.removeEventListener('click', unlockAudio);
-          window.removeEventListener('touchstart', unlockAudio);
-          window.removeEventListener('keydown', unlockAudio);
-        };
-        window.addEventListener('click', unlockAudio, { once: true });
-        window.addEventListener('touchstart', unlockAudio, { once: true });
-        window.addEventListener('keydown', unlockAudio, { once: true });
-        return () => {
-          window.removeEventListener('click', unlockAudio);
-          window.removeEventListener('touchstart', unlockAudio);
-          window.removeEventListener('keydown', unlockAudio);
-        };
+      if (document.visibilityState === 'visible') {
+        const ctx = getAudioContext();
+        if (ctx && ctx.state === 'running') {
+          playBirthdayMelody(true);
+        } else {
+          // Unlock on user's first touch/click/key if browser restricted autoplay
+          const unlockAudio = () => {
+            if (document.visibilityState === 'visible') {
+              const activeCtx = getAudioContext();
+              if (activeCtx && activeCtx.state === 'running') {
+                playBirthdayMelody(true);
+              }
+            }
+            window.removeEventListener('click', unlockAudio);
+            window.removeEventListener('touchstart', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+          };
+          window.addEventListener('click', unlockAudio, { once: true });
+          window.addEventListener('touchstart', unlockAudio, { once: true });
+          window.addEventListener('keydown', unlockAudio, { once: true });
+          return () => {
+            window.removeEventListener('click', unlockAudio);
+            window.removeEventListener('touchstart', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+          };
+        }
       }
     } else {
-      stopBirthdayMelody();
+      suspendAudio();
     }
+  }, [soundEnabled]);
+
+  // --- PAUSE MUSIC ON WINDOW MINIMIZE / BACKGROUND / SWITCHING BROWSER ---
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        suspendAudio();
+      } else if (document.visibilityState === 'visible' && soundEnabled) {
+        resumeAudio(true);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      // User switched to another browser or minimized the window
+      suspendAudio();
+    };
+
+    const handleWindowFocus = () => {
+      // User returned and focused the window
+      if (soundEnabled && document.visibilityState === 'visible') {
+        resumeAudio(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
   }, [soundEnabled]);
 
   // --- CANDLE & CAKE CEREMONY ---
@@ -151,10 +190,9 @@ export default function App() {
     const nextSound = !soundEnabled;
     setSoundEnabled(nextSound);
     if (nextSound) {
-      getAudioContext();
-      playBirthdayMelody(true);
+      resumeAudio(true);
     } else {
-      stopBirthdayMelody();
+      suspendAudio();
     }
   }, [soundEnabled]);
 
